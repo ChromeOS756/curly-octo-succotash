@@ -66,13 +66,13 @@ jobs:
         run: |
           sudo mkdir /mnt/globalData
           sudo chown $(whoami) /mnt/globalData/
-      - name: Dump GitHub token, GitHub context and other environment variables to the home directory (useful for debugging purposes)
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: |
-          echo "$GITHUB_CONTEXT" >> ~/github_context.txt
-          echo "$GH_TOKEN" > ~/gh_token.txt
-          env >> ~/env.txt
+      # - name: Dump GitHub token, GitHub context and other environment variables to the home directory (useful for debugging purposes)
+      #   env:
+      #     GITHUB_CONTEXT: ${{ toJSON(github) }}
+      #   run: |
+      #     echo "$GITHUB_CONTEXT" >> ~/github_context.txt
+      #     echo "$GH_TOKEN" > ~/gh_token.txt
+      #     env >> ~/env.txt
       - name: Get files from old runtime (if exists)
         if: ${{ inputs.oldTailscaleHostname != '' }}
         run: |
