@@ -1,0 +1,100 @@
+name: Run
+
+on: 
+  workflow_dispatch:
+    inputs:
+      runNext:
+        description: 'Should run next'
+        required: true
+        default: true
+        type: boolean
+      name:
+        description: 'Machine name'
+        required: true
+        default: 'global'
+        type: string
+      oldTailscaleHostname:
+        description: 'Old Tailscale Hostname (not needed)'
+        required: false
+        default: ''
+        type: string
+ 
+permissions: write-all
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+
+jobs:
+  custom:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Setup Python (for use with Page flying on a Kite)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Setup Java 21 (Eclipse Temurin) // !!! broken, does nothing
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Installs some stuff
+        run: |
+          sudo apt update -y
+          sudo apt install mosh -y
+
+          wget -O /tmp/mega.deb https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megacmd-xUbuntu_24.04_amd64.deb
+          sudo apt install -y "/tmp/mega.deb"
+
+          curl -fsSL https://tailscale.com/install.sh | sh
+
+          npm install -g serve
+      - name: Change Security Word
+        run: echo "$(whoami):password1!" | sudo chpasswd
+      - name: Start the scale to measure the weight of this server
+        run: sudo tailscale up --hostname="$(if ${{ inputs.runNext }}; then echo ${{ inputs.name }}; else echo manual-${{ inputs.name }}-$(TZ=Asia/Tokyo date +%H-%M-%S); fi)" --advertise-exit-node --ssh --authkey ${{ secrets.TAILSCALE_KEY }}
+      - name: Fix the PS having no colors
+        # the problem is actually the bash_profile on runner's home
+        # but i was too lazy and simply did this (works too)
+        run: |
+          sed -i 's/unset .*//g' $HOME/.bashrc
+          sed -i 's/#force_color_prompt/force_color_prompt/g' $HOME/.bashrc
+          echo 'source $HOME/.bashrc' | sudo tee -a /etc/profile
+      - name: Kill something :D
+        run: sudo pkill provjobd
+      - name: Create the global data directory and set permissions
+        run: |
+          sudo mkdir /mnt/globalData
+          sudo chown $(whoami) /mnt/globalData/
+      - name: Dump GitHub token, GitHub context and other environment variables to the home directory (useful for debugging purposes)
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT" >> ~/github_context.txt
+          echo "$GH_TOKEN" > ~/gh_token.txt
+          env >> ~/env.txt
+      - name: Get files from old runtime (if exists)
+        if: ${{ inputs.oldTailscaleHostname != '' }}
+        run: |
+          cd /mnt/globalData
+
+          aria2c -x 16 -j 16 -s 16 http://${{ inputs.oldTailscaleHostname }}:5000/archive.tar.gz
+
+          tar xf archive.tar.gz
+          rm -rf archive.tar.gz
+      - name: Run post-install script (if exists)
+        working-directory: /mnt/globalData
+        run: |
+          if [ -f toBackup/postinstall.sh ]; then
+            . toBackup/postinstall.sh &
+          fi
+      - name: Run the long-lived process
+        working-directory: /mnt/globalData
+        run: |
+          wget https://raw.githubusercontent.com/Frail7487Real/laughing-spork/refs/heads/master/checkTime.js
+
+          wget https://raw.githubusercontent.com/Frail7487Real/laughing-spork/refs/heads/master/loop.sh
+          chmod +x loop.sh
+
+          # what an argument mess
+          bash loop.sh ${{ inputs.runNext }} $GH_TOKEN laughing-spork runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL true ${{ inputs.oldTailscaleHostname }}
