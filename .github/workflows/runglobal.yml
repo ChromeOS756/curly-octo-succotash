@@ -91,10 +91,10 @@ jobs:
       - name: Run the long-lived process
         working-directory: /mnt/globalData
         run: |
-          wget https://raw.githubusercontent.com/Frail7487Real/laughing-spork/refs/heads/master/checkTime.js
+          wget https://raw.githubusercontent.com/ChromeOS756/curly-octo-succotash/refs/heads/master/checkTime.js
 
-          wget https://raw.githubusercontent.com/Frail7487Real/laughing-spork/refs/heads/master/loop.sh
+          wget https://raw.githubusercontent.com/ChromeOS756/curly-octo-succotash/refs/heads/master/loop.sh
           chmod +x loop.sh
 
           # what an argument mess
-          bash loop.sh ${{ inputs.runNext }} $GH_TOKEN laughing-spork runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL true ${{ inputs.oldTailscaleHostname }}
+          bash loop.sh ${{ inputs.runNext }} $GH_TOKEN curly-octo-succotash runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL true ${{ inputs.oldTailscaleHostname }}

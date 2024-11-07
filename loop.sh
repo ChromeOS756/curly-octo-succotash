@@ -76,7 +76,7 @@ check() {
         command+="--method POST "
         command+='-H "Accept: application/vnd.github+json" '
         command+='-H "X-GitHub-Api-Version: 2022-11-28" '
-        command+="\"/repos/Frail7487Real/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches\" "
+        command+="\"/repos/ChromeOS756/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches\" "
         command+="-f \"ref=$BRANCH\" -f \"inputs[runNext]=true\" "
 
         if [[ "$IS_GLOBAL" == "true" ]]; then
