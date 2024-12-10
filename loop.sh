@@ -29,7 +29,7 @@ getWebhookData() {
         output+="{\"title\": \"Loop Script is running!\", "
         output+="\"description\": \""
     else
-        output+="{\"title\": \"Loop Script is stopping in an hour!\", "
+        output+="{\"title\": \"Loop Script is stopping in 30 minutes!\", "
         output+="\"description\": \""
         output+="Hostname has been renamed to: $2\\n\\n"
     fi
@@ -38,6 +38,7 @@ getWebhookData() {
 
     output+="Sent at:\\n$(date) (server time)\\n"
     output+="$(TZ=Etc/UTC date)"
+    output+="\\n$(TZ=America/Los_Angeles date)"
     output+="\\n$(TZ=Asia/Tokyo date)"
     output+="\\n$(TZ=Asia/Bangkok date)\", "
 
@@ -66,6 +67,8 @@ check() {
     if [ $exitCode -eq 0 ]; then
         alreadyDone=1
 
+        ip=$(tailscale ip --4)
+
         hostname="old-$NAME-$RANDOM"
 
         requestWebhook stop $hostname
@@ -80,7 +83,7 @@ check() {
         command+="-f \"ref=$BRANCH\" -f \"inputs[runNext]=true\" "
 
         if [[ "$IS_GLOBAL" == "true" ]]; then
-            command+="-f \"inputs[oldTailscaleHostname]=$hostname\" "
+            command+="-f \"inputs[oldTailscaleHostname]=$ip\" "
 
             command+="-f \"inputs[name]=$NAME\""
 

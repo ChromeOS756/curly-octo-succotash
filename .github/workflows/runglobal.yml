@@ -14,7 +14,7 @@ on:
         default: 'global'
         type: string
       oldTailscaleHostname:
-        description: 'Old Tailscale Hostname (not needed)'
+        description: 'Old Tailscale Hostname/IP (not needed)'
         required: false
         default: ''
         type: string
