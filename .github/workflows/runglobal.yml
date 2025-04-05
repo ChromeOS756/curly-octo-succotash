@@ -75,7 +75,6 @@ jobs:
       #     env >> ~/env.txt
       - name: Get files from old runtime (if exists)
         if: ${{ inputs.oldTailscaleHostname != '' }}
-        continue-on-error: true
         run: |
           cd /mnt/globalData
 
@@ -93,7 +92,7 @@ jobs:
             fi
             
             sleep 1
-          done
+          done || true
       - name: Run post-install script (if exists)
         working-directory: /mnt/globalData
         run: |
