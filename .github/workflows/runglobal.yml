@@ -78,10 +78,21 @@ jobs:
         run: |
           cd /mnt/globalData
 
-          aria2c -x 16 -j 16 -s 16 http://${{ inputs.oldTailscaleHostname }}:5000/archive.tar.gz
+          while true
+          do
+            aria2c -x 16 -j 16 -s 16 http://${{ inputs.oldTailscaleHostname }}:5000/archive.tar
 
-          tar xf archive.tar.gz
-          rm -rf archive.tar.gz
+            exitCode=$?
+
+            if [ $exitCode -eq 0 ]; then
+              tar xf archive.tar
+              rm -rf archive.tar
+
+              break
+            fi
+            
+            sleep 1
+          done
       - name: Run post-install script (if exists)
         working-directory: /mnt/globalData
         run: |

@@ -48,7 +48,7 @@ getWebhookData() {
         output+="\"color\": 15105570} ]}"
     fi
 
-    echo $output
+    echo "$output"
 }
 
 requestWebhook() {
@@ -56,12 +56,12 @@ requestWebhook() {
         -X POST \
         -H "Accept: application/json" \
         -H "Content-Type: application/json" \
-        --data "$(getWebhookData $1 $2)" \
-        $WEBHOOK_URL
+        --data "$(getWebhookData "$1" "$2")" \
+        "$WEBHOOK_URL"
 }
 
 check() {
-    node checkTime.js $START_TIME
+    node checkTime.js "$START_TIME"
     exitCode=$?
 
     if [ $exitCode -eq 0 ]; then
@@ -71,9 +71,9 @@ check() {
 
         hostname="old-$NAME-$RANDOM"
 
-        requestWebhook stop $hostname
+        requestWebhook stop "$hostname"
 
-        sudo tailscale up --hostname=$hostname --advertise-exit-node --ssh
+        sudo tailscale up --hostname="$hostname" --advertise-exit-node --ssh
 
         command="gh api "
         command+="--method POST "
@@ -87,6 +87,8 @@ check() {
 
             command+="-f \"inputs[name]=$NAME\""
 
+            eval "$command"
+
             cd /mnt/globalData/toBackup
 
             if [ -f postruntime.sh ]; then
@@ -95,12 +97,12 @@ check() {
 
             cd /mnt/globalData
 
-            sudo tar cf archive.tar.gz toBackup/
+            sudo tar cf archive.tar toBackup/
 
             serve -p 5000 &
+        else
+            eval "$command"
         fi
-
-        eval "$command"
     fi
 }
 
