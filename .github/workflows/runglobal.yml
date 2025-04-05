@@ -75,6 +75,7 @@ jobs:
       #     env >> ~/env.txt
       - name: Get files from old runtime (if exists)
         if: ${{ inputs.oldTailscaleHostname != '' }}
+        continue-on-error: true
         run: |
           cd /mnt/globalData
 
