@@ -97,7 +97,8 @@ check() {
 
             cd /mnt/globalData
 
-            sudo tar cf archive.tar toBackup/
+            sudo tar cf temp.tar toBackup/
+            sudo mv temp.tar archive.tar # is this necessary?
 
             serve -p 5000 &
         else
