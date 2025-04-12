@@ -40,15 +40,11 @@ jobs:
           java-version: '21'
       - name: Installs some stuff
         run: |
-          sudo apt update -y
-          sudo apt install mosh -y
-
-          wget -O /tmp/mega.deb https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megacmd-xUbuntu_24.04_amd64.deb
-          sudo apt install -y "/tmp/mega.deb"
-
+          # this tailscale install script automatically does apt-get update,
+          # so we just do nothing here and let the script slide
           curl -fsSL https://tailscale.com/install.sh | sh
 
-          npm install -g serve
+          npm install -g serve &
       - name: Change Security Word
         run: echo "$(whoami):password1!" | sudo chpasswd
       - name: Start the scale to measure the weight of this server
