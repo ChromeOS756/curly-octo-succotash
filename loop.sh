@@ -18,6 +18,9 @@ alreadyDone=0
 
 sudo pkill provjobd
 
+sudo sync
+echo 3 | sudo tee /proc/sys/vm/drop_caches
+
 getWebhookData() {
     output="{\"username\": \"$NAME\", "
     output+="\"embeds\": [ "
@@ -113,9 +116,6 @@ while true; do
     if [ "$firstTime" != 1 ] && [ "$alreadyDone" != 1 ] && [ "$1" == "true" ]; then
         check
     fi
-
-    sudo sync
-    echo 3 | sudo tee /proc/sys/vm/drop_caches
 
     ping -c 1 google.com 
     curl google.com
