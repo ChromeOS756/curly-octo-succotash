@@ -104,4 +104,4 @@ jobs:
           chmod +x loop.sh
 
           # what an argument mess
-          bash loop.sh ${{ inputs.runNext }} $GH_TOKEN curly-octo-succotash runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL true ${{ inputs.oldTailscaleHostname }}
+          bash loop.sh ${{ inputs.runNext }} $GH_TOKEN curly-octo-succotash runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL

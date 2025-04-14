@@ -12,9 +12,6 @@ NAME=$6
 
 WEBHOOK_URL=$7
 
-IS_GLOBAL=$8
-OLD_TAILSCALE_HOSTNAME=$9
-
 firstTime=1
 
 alreadyDone=0
@@ -71,8 +68,6 @@ check() {
 
         hostname="old-$NAME-$RANDOM"
 
-        requestWebhook stop "$hostname"
-
         sudo tailscale up --hostname="$hostname" --advertise-exit-node --ssh
 
         command="gh api "
@@ -82,28 +77,31 @@ check() {
         command+="\"/repos/ChromeOS756/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches\" "
         command+="-f \"ref=$BRANCH\" -f \"inputs[runNext]=true\" "
 
-        if [[ "$IS_GLOBAL" == "true" ]]; then
-            command+="-f \"inputs[oldTailscaleHostname]=$ip\" "
+        command+="-f \"inputs[oldTailscaleHostname]=$ip\" "
 
-            command+="-f \"inputs[name]=$NAME\""
+        command+="-f \"inputs[name]=$NAME\""
 
-            eval "$command"
+        eval "$command"
 
-            cd /mnt/globalData/toBackup
+        # waits for the new instance to start, then actually stop and
+        # transfer everything, for efficient transferring with
+        # small downtime gap
+        sleep 45
 
-            if [ -f postruntime.sh ]; then
-                . postruntime.sh
-            fi
+        requestWebhook stop "$hostname"
 
-            cd /mnt/globalData
+        cd /mnt/globalData/toBackup
 
-            sudo tar cf temp.tar toBackup/
-            sudo mv temp.tar archive.tar # is this necessary?
-
-            serve -p 5000 &
-        else
-            eval "$command"
+        if [ -f postruntime.sh ]; then
+            . postruntime.sh
         fi
+
+        cd /mnt/globalData
+
+        sudo tar cf temp.tar toBackup/
+        sudo mv temp.tar archive.tar # is this necessary?
+
+        serve -p 5000 &
     fi
 }
 
