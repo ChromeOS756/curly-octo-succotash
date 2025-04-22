@@ -81,7 +81,7 @@ check() {
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "/repos/ChromeOS756/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches" \
-            -f "ref=$BRANCH\" -f \"inputs[runNext]=true" \
+            -f "ref=$BRANCH" -f "inputs[runNext]=true" \
             -f "inputs[oldTailscaleHostname]=$ip" \
             -f "inputs[name]=$NAME"
 
