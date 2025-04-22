@@ -43,8 +43,6 @@ jobs:
           # this tailscale install script automatically does apt-get update,
           # so we just do nothing here and let the script slide
           curl -fsSL https://tailscale.com/install.sh | sh
-
-          npm install -g serve &
       - name: Change Security Word
         run: echo "$(whoami):password1!" | sudo chpasswd
       - name: Start the scale to measure the weight of this server
@@ -74,21 +72,10 @@ jobs:
         run: |
           cd /mnt/globalData
 
-          while true
-          do
-            aria2c -x 16 -j 16 -s 16 http://${{ inputs.oldTailscaleHostname }}:5000/archive.tar
-
-            exitCode=$?
-
-            if [ $exitCode -eq 0 ]; then
-              tar xf archive.tar
-              rm -rf archive.tar
-
-              break
-            fi
-            
-            sleep 1
-          done || true
+          # we need `sudo rsync` because some files can be made as root
+          # or made in a docker container where we can have permission
+          # issues with them
+          rsync -a --rsync-path="sudo rsync" -e "ssh -o StrictHostKeyChecking=no" ${{ inputs.oldTailscaleHostname }}:/mnt/globalData/toBackup ./
       - name: Run post-install script (if exists)
         working-directory: /mnt/globalData
         run: |

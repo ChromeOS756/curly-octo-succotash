@@ -2,6 +2,8 @@
 
 START_TIME=$(TZ=Etc/UTC date +"%d:%m:%Y:%H:%M")
 
+# actually required for gh cli
+# shellcheck disable=SC2034
 GH_TOKEN=$2
 
 REPO=$3
@@ -64,7 +66,8 @@ check() {
     node checkTime.js "$START_TIME"
     exitCode=$?
 
-    if [ $exitCode -eq 0 ]; then
+    if [ $exitCode -eq 0 ]
+    then
         alreadyDone=1
 
         ip=$(tailscale ip --4)
@@ -73,38 +76,27 @@ check() {
 
         sudo tailscale up --hostname="$hostname" --advertise-exit-node --ssh
 
-        command="gh api "
-        command+="--method POST "
-        command+='-H "Accept: application/vnd.github+json" '
-        command+='-H "X-GitHub-Api-Version: 2022-11-28" '
-        command+="\"/repos/ChromeOS756/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches\" "
-        command+="-f \"ref=$BRANCH\" -f \"inputs[runNext]=true\" "
+        gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/ChromeOS756/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches" \
+            -f "ref=$BRANCH\" -f \"inputs[runNext]=true" \
+            -f "inputs[oldTailscaleHostname]=$ip" \
+            -f "inputs[name]=$NAME"
 
-        command+="-f \"inputs[oldTailscaleHostname]=$ip\" "
-
-        command+="-f \"inputs[name]=$NAME\""
-
-        eval "$command"
-
-        # waits for the new instance to start, then actually stop and
-        # transfer everything, for efficient transferring with
-        # small downtime gap
-        sleep 45
+        # this may cause issues if the new runtime starts in less than 10 seconds
+        # (pretty unlikely but stil possible...)
+        # usually it takes around 45 seconds to reach the rsync step
+        sleep 10
 
         requestWebhook stop "$hostname"
 
-        cd /mnt/globalData/toBackup
+        cd /mnt/globalData/toBackup || return
 
         if [ -f postruntime.sh ]; then
             . postruntime.sh
         fi
-
-        cd /mnt/globalData
-
-        sudo tar cf temp.tar toBackup/
-        sudo mv temp.tar archive.tar # is this necessary?
-
-        serve -p 5000 &
     fi
 }
 
@@ -112,7 +104,8 @@ if [ "$1" == "true" ]; then
     requestWebhook start
 fi
 
-while true; do
+while true
+do
     if [ "$firstTime" != 1 ] && [ "$alreadyDone" != 1 ] && [ "$1" == "true" ]; then
         check
     fi
