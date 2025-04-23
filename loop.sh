@@ -2,17 +2,19 @@
 
 START_TIME=$(TZ=Etc/UTC date +"%d:%m:%Y:%H:%M")
 
+METHOD=$2
+
 # actually required for gh cli
 # shellcheck disable=SC2034
-GH_TOKEN=$2
+GH_TOKEN=$3
 
-REPO=$3
-WORKFLOW_FILE=$4
-BRANCH=$5
+REPO=$4
+WORKFLOW_FILE=$5
+BRANCH=$6
 
-NAME=$6
+NAME=$7
 
-WEBHOOK_URL=$7
+WEBHOOK_URL=$8
 
 firstTime=1
 
@@ -83,12 +85,14 @@ check() {
             "/repos/ChromeOS756/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches" \
             -f "ref=$BRANCH" -f "inputs[runNext]=true" \
             -f "inputs[oldTailscaleHostname]=$ip" \
-            -f "inputs[name]=$NAME"
+            -f "inputs[name]=$NAME" \
+            -f "inputs[method]=$METHOD"
 
-        # this may cause issues if the new runtime starts in less than 10 seconds
-        # (pretty unlikely but stil possible...)
-        # usually it takes around 45 seconds to reach the rsync step
-        sleep 10
+        if [ "$METHOD" == "aria2" ]; then
+            sleep 45
+        else
+            sleep 10
+        fi
 
         requestWebhook stop "$hostname"
 
@@ -96,6 +100,15 @@ check() {
 
         if [ -f postruntime.sh ]; then
             . postruntime.sh
+        fi
+
+        if [ "$METHOD" == "aria2" ]; then
+            cd /mnt/globalData || return
+
+            sudo tar cf temp.tar toBackup/
+            sudo mv temp.tar archive.tar # is this necessary?
+
+            serve -p 5000 &
         fi
     fi
 }

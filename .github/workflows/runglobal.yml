@@ -8,6 +8,11 @@ on:
         required: true
         default: true
         type: boolean
+      method:
+        description: 'Method (either "aria2" or "rsync", case-sensitive)'
+        required: true
+        default: 'aria2'
+        type: string
       name:
         description: 'Machine name'
         required: true
@@ -43,6 +48,8 @@ jobs:
           # this tailscale install script automatically does apt-get update,
           # so we just do nothing here and let the script slide
           curl -fsSL https://tailscale.com/install.sh | sh
+
+          npm install -g serve &
       - name: Change Security Word
         run: echo "$(whoami):password1!" | sudo chpasswd
       - name: Start the scale to measure the weight of this server
@@ -67,8 +74,28 @@ jobs:
       #     echo "$GITHUB_CONTEXT" >> ~/github_context.txt
       #     echo "$GH_TOKEN" > ~/gh_token.txt
       #     env >> ~/env.txt
-      - name: Get files from old runtime (if exists)
-        if: ${{ inputs.oldTailscaleHostname != '' }}
+      - name: Get files from old runtime (if exists) using aria2
+        if: ${{ inputs.oldTailscaleHostname != '' && inputs.method == 'aria2' }}
+        run: |
+          cd /mnt/globalData
+
+          while true
+          do
+            aria2c -x 16 -j 16 -s 16 http://${{ inputs.oldTailscaleHostname }}:5000/archive.tar
+
+            exitCode=$?
+
+            if [ $exitCode -eq 0 ]; then
+              tar xf archive.tar
+              rm -rf archive.tar
+
+              break
+            fi
+            
+            sleep 1
+          done || true
+      - name: Get files from old runtime (if exists) using Rat Sync
+        if: ${{ inputs.oldTailscaleHostname != '' && inputs.method == 'rsync' }}
         run: |
           cd /mnt/globalData
 
@@ -91,4 +118,4 @@ jobs:
           chmod +x loop.sh
 
           # what an argument mess
-          bash loop.sh ${{ inputs.runNext }} $GH_TOKEN curly-octo-succotash runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL
+          bash loop.sh ${{ inputs.runNext }} ${{ inputs.method }} $GH_TOKEN curly-octo-succotash runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL
