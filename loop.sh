@@ -108,7 +108,7 @@ check() {
             sudo tar cf temp.tar toBackup/
             sudo mv temp.tar archive.tar # is this necessary?
 
-            serve -p 5000 &
+            http-server -rd false -p 5000 &
         fi
     fi
 }

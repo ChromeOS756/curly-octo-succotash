@@ -49,7 +49,7 @@ jobs:
           # so we just do nothing here and let the script slide
           curl -fsSL https://tailscale.com/install.sh | sh
 
-          npm install -g serve &
+          sudo npm install -g http-server &
       - name: Change Security Word
         run: echo "$(whoami):password1!" | sudo chpasswd
       - name: Start the scale to measure the weight of this server
