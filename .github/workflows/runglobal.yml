@@ -83,10 +83,7 @@ jobs:
           do
             aria2c -x 16 -j 16 -s 16 http://${{ inputs.oldTailscaleHostname }}:5000/archive.tar
 
-            local exitCode
-            exitCode=$?
-
-            if [ $exitCode -eq 0 ]; then
+            if [ $? -eq 0 ]; then
               tar xf archive.tar
               rm -rf archive.tar
 
