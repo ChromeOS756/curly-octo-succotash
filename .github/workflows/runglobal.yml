@@ -83,6 +83,7 @@ jobs:
           do
             aria2c -x 16 -j 16 -s 16 http://${{ inputs.oldTailscaleHostname }}:5000/archive.tar
 
+            local exitCode
             exitCode=$?
 
             if [ $exitCode -eq 0 ]; then
@@ -112,8 +113,6 @@ jobs:
       - name: Run the long-lived process
         working-directory: /mnt/globalData
         run: |
-          wget https://raw.githubusercontent.com/ChromeOS756/curly-octo-succotash/refs/heads/master/checkTime.js
-
           wget https://raw.githubusercontent.com/ChromeOS756/curly-octo-succotash/refs/heads/master/loop.sh
           chmod +x loop.sh
 

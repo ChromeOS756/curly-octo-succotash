@@ -1,6 +1,8 @@
 #!/bin/bash
 
-START_TIME=$(TZ=Etc/UTC date +"%d:%m:%Y:%H:%M")
+START_TIME=$(( $(date +%s) / 60 ))
+
+IS_GLOBAL=$1
 
 METHOD=$2
 
@@ -26,7 +28,7 @@ sudo sync
 echo 3 | sudo tee /proc/sys/vm/drop_caches
 
 getWebhookData() {
-    output="{\"username\": \"$NAME\", "
+    local output="{\"username\": \"$NAME\", "
     output+="\"embeds\": [ "
     
     if [ "$1" == "start" ]; then
@@ -65,16 +67,13 @@ requestWebhook() {
 }
 
 check() {
-    node checkTime.js "$START_TIME"
-    exitCode=$?
-
-    if [ $exitCode -eq 0 ]
-    then
+    if shouldRestart; then
         alreadyDone=1
 
+        local ip
         ip=$(tailscale ip --4)
 
-        hostname="old-$NAME-$RANDOM"
+        local hostname="old-$NAME-$RANDOM"
 
         sudo tailscale up --hostname="$hostname" --advertise-exit-node --ssh
 
@@ -113,13 +112,28 @@ check() {
     fi
 }
 
-if [ "$1" == "true" ]; then
+shouldRestart() {
+    local target_minutes=$((START_TIME + 330))  # 5 hours 30 minutes = 330 minutes
+
+    local current_minutes=$(( $(date +%s) / 60 ))
+
+    echo target minutes is $target_minutes
+    echo current current is $current_minutes
+
+    if [[ "$current_minutes" -eq "$target_minutes" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+if [ "$IS_GLOBAL" == "true" ]; then
     requestWebhook start
 fi
 
 while true
 do
-    if [ "$firstTime" != 1 ] && [ "$alreadyDone" != 1 ] && [ "$1" == "true" ]; then
+    if [ "$firstTime" != 1 ] && [ "$alreadyDone" != 1 ] && [ "$IS_GLOBAL" == "true" ]; then
         check
     fi
 
