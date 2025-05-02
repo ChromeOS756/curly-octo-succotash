@@ -77,6 +77,8 @@ check() {
 
         sudo tailscale up --hostname="$hostname" --advertise-exit-node --ssh
 
+        sleep 10 # interestingly, tailscale takes a while to update the hostname
+
         gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
