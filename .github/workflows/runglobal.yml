@@ -34,13 +34,13 @@ jobs:
   custom:
     runs-on: ubuntu-24.04
     steps:
-      - name: Kill something :D
-        run: |
-          while true
-          do
-            sudo pkill -9 provjobd
-            sleep 0.5
-          done || true &
+      # - name: Kill something :D
+      #   run: |
+      #     while true
+      #     do
+      #       sudo pkill -9 provjobd
+      #       sleep 0.5
+      #     done || true &
       - name: Setup Python (for use with Page flying on a Kite)
         uses: actions/setup-python@v5
         with:
