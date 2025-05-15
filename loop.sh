@@ -6,8 +6,6 @@ firstTime=1
 
 alreadyDone=0
 
-# sudo pkill -9 provjobd
-
 sudo sync
 echo 3 | sudo tee /proc/sys/vm/drop_caches
 
@@ -42,8 +40,6 @@ getWebhookData() {
 }
 
 requestWebhook() {
-    echo "requesting webhook"
-
     curl \
         -X POST \
         -H "Accept: application/json" \
@@ -125,10 +121,8 @@ do
         check
     fi
 
-    echo pinging
     ping -c 1 google.com 
     curl google.com
-    echo "done pinging"
 
     if [ "$firstTime" != 1 ]; then
         sleep 10
