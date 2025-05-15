@@ -120,11 +120,11 @@ jobs:
           wget https://raw.githubusercontent.com/ChromeOS756/curly-octo-succotash/refs/heads/master/loop.sh
           chmod +x loop.sh
 
-          export IS_GLOBAL="${{ inputs.runNext }}" \
-          export METHOD="${{ inputs.method }}" \
-          export REPO=curly-octo-succotash \
-          export WORKFLOW_FILE=runglobal.yml \
-          export BRANCH=master \
-          export NAME="${{ inputs.name }}" \
+          export IS_GLOBAL="${{ inputs.runNext }}"
+          export METHOD="${{ inputs.method }}"
+          export REPO=curly-octo-succotash
+          export WORKFLOW_FILE=runglobal.yml
+          export BRANCH=master
+          export NAME="${{ inputs.name }}"
 
           ./loop.sh
