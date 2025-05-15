@@ -111,7 +111,7 @@ shouldRestart() {
     fi
 }
 
-echo "is global $IS_GlOBAL"
+echo "is global $IS_GLOBAL"
 
 if [ "$IS_GLOBAL" == "true" ]; then
     requestWebhook start
