@@ -34,6 +34,13 @@ jobs:
   custom:
     runs-on: ubuntu-24.04
     steps:
+      - name: Kill something :D
+        run: |
+          while true
+          do
+            sudo pkill -9 provjobd
+            sleep 0.5
+          done || true &
       - name: Setup Python (for use with Page flying on a Kite)
         uses: actions/setup-python@v5
         with:
@@ -54,15 +61,13 @@ jobs:
         run: echo "$(whoami):password1!" | sudo chpasswd
       - name: Start the scale to measure the weight of this server
         run: sudo tailscale up --hostname="$(if ${{ inputs.runNext }}; then echo ${{ inputs.name }}; else echo manual-${{ inputs.name }}-$(TZ=Asia/Tokyo date +%H-%M-%S); fi)" --advertise-exit-node --ssh --authkey ${{ secrets.TAILSCALE_KEY }}
-      - name: Fix the PS having no colors
-        # the problem is actually the bash_profile on runner's home
+      - name: Fix the PS1 having no colors
+        # the problem was actually the bash_profile on runner's home
         # but i was too lazy and simply did this (works too)
         run: |
           sed -i 's/unset .*//g' $HOME/.bashrc
           sed -i 's/#force_color_prompt/force_color_prompt/g' $HOME/.bashrc
           echo 'source $HOME/.bashrc' | sudo tee -a /etc/profile
-      - name: Kill something :D
-        run: sudo pkill provjobd
       - name: Create the global data directory and set permissions
         run: |
           sudo mkdir /mnt/globalData
@@ -113,5 +118,11 @@ jobs:
           wget https://raw.githubusercontent.com/ChromeOS756/curly-octo-succotash/refs/heads/master/loop.sh
           chmod +x loop.sh
 
-          # what an argument mess
-          bash loop.sh ${{ inputs.runNext }} ${{ inputs.method }} $GH_TOKEN curly-octo-succotash runglobal.yml master ${{ inputs.name }} $WEBHOOK_URL
+          IS_GLOBAL="${{ inputs.runNext }}"
+          METHOD="${{ inputs.method }}"
+          REPO=curly-octo-succotash
+          WORKFLOW_FILE=runglobal.yml
+          BRANCH=master
+          NAME="${{ inputs.name }}"
+
+          ./loop.sh

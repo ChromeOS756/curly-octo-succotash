@@ -2,27 +2,11 @@
 
 START_TIME=$(( $(date +%s) / 60 ))
 
-IS_GLOBAL=$1
-
-METHOD=$2
-
-# actually required for gh cli
-# shellcheck disable=SC2034
-GH_TOKEN=$3
-
-REPO=$4
-WORKFLOW_FILE=$5
-BRANCH=$6
-
-NAME=$7
-
-WEBHOOK_URL=$8
-
 firstTime=1
 
 alreadyDone=0
 
-sudo pkill provjobd
+sudo pkill -9 provjobd
 
 sudo sync
 echo 3 | sudo tee /proc/sys/vm/drop_caches
@@ -77,7 +61,7 @@ check() {
 
         sudo tailscale up --hostname="$hostname" --advertise-exit-node --ssh
 
-        sleep 10 # interestingly, tailscale takes a while to update the hostname
+        sleep 15 # interestingly, tailscale takes a while to update the hostname
 
         gh api \
             --method POST \
