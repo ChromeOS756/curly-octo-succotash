@@ -6,7 +6,7 @@ firstTime=1
 
 alreadyDone=0
 
-sudo pkill -9 provjobd
+# sudo pkill -9 provjobd
 
 sudo sync
 echo 3 | sudo tee /proc/sys/vm/drop_caches
