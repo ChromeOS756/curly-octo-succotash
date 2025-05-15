@@ -42,6 +42,8 @@ getWebhookData() {
 }
 
 requestWebhook() {
+    echo "requesting webhook"
+
     curl \
         -X POST \
         -H "Accept: application/json" \
@@ -123,8 +125,10 @@ do
         check
     fi
 
+    echo pinging
     ping -c 1 google.com 
     curl google.com
+    echo "done pinging"
 
     if [ "$firstTime" != 1 ]; then
         sleep 10
